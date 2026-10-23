@@ -4,25 +4,42 @@ pipeline {
     parameters {
         choice(
             name: 'ENVIRONMENT',
-            choices: ['dev', 'staging', 'production']
+            choices: ['staging', 'production']
         )
     }
 
     stages {
-        stage('Approval') {
-            when {
-                expression {
-                    params.ENVIRONMENT == 'production'
-                }
-            }
+        stage('Checkout') {
             steps {
-                input message: 'Deploy to production?'
+                checkout scm
             }
         }
 
-        stage('Deploy') {
+        stage('Quality') {
+            parallel {
+                stage('Build') {
+                    steps {
+                        bat 'echo Build'
+                    }
+                }
+
+                stage('Lint') {
+                    steps {
+                        bat 'echo Lint'
+                    }
+                }
+            }
+        }
+
+        stage('Test') {
             steps {
-                bat "echo Deploy to ${params.ENVIRONMENT}"
+                bat 'echo Test'
+            }
+        }
+
+        stage('Package') {
+            steps {
+                bat 'echo Package'
             }
         }
     }
